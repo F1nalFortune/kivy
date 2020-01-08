@@ -9,9 +9,14 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.uix.screenmanager import Screen
+from kivy.uix.button import ButtonBehavior
+from kivy.uix.label import Label
+from myfirebase import MyFirebase
 import face_recognition
 import numpy as np
 import os
+import requests
+import json
 
 
 class HomeScreen(Screen):
@@ -58,6 +63,12 @@ class HomeScreen(Screen):
             capture.release()
             capture = None
         EventLoop.close()
+
+class LabelButton(ButtonBehavior, Label):
+  pass
+
+class LoginScreen(Screen):
+  pass
 
 class SettingsScreen(Screen):
   pass
@@ -165,7 +176,13 @@ GUI = Builder.load_file("main.kv")
 class mainApp(App):
 
     def build(self):
+        self.my_firebase = MyFirebase()
         return GUI
+
+    def on_start(self):
+      #Get Database Data
+      result = requests.get("https://blacklister-b7bc8.firebaseio.com/")
+      #Populate Blacklisters
 
     def on_stop(self):
         global capture

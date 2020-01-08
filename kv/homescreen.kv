@@ -9,6 +9,12 @@
             on_release: root.dostart()
             size: 75, 50
             size_hint: None, None
+        Button:
+            text: "Settings"
+            font_size: 12
+            on_release: app.change_screen("settings_screen")
+            size: 75, 50
+            size_hint: None, None
 
 
         # Button:
