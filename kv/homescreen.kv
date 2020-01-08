@@ -1,0 +1,17 @@
+<HomeScreen>:
+    KivyCamera:
+        id: qrcam
+    GridLayout:
+        cols: 1
+        Button:
+            text: "Start"
+            font_size: 12
+            on_release: root.dostart()
+            size: 75, 50
+            size_hint: None, None
+
+
+        # Button:
+        #     id: butt_settings
+        #     text: "settings"
+        #     on_release:  app.change_screen("settings_screen")
