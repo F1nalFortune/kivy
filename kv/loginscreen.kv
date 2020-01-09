@@ -13,6 +13,11 @@
             size_hint: .8, .1
             pos_hint: {"top": .9, "right": .9}
         TextInput:
+            id: login_company
+            hint_text: "company"
+            size_hint: .8, .1
+            pos_hint: {"top": .8, "right": .9}
+        TextInput:
             id: login_password
             password: True
             hint_text: "password"
@@ -35,4 +40,4 @@
             size_hint: .8, .1
             pos_hint: {"top": .2, "right" :.9}
             on_release:
-                app.my_firebase.sign_up(login_email.text, login_password.text)
+                app.my_firebase.sign_up(login_email.text, login_password.text, login_company.text)

@@ -1,0 +1,15 @@
+<DatabaseScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            Button:
+                text: 'Upload Blacklist'
+                on_release: root.show_load()
+            Button:
+                text: 'Download Blacklist'
+                on_release: root.download(app.company, app.id_token)
+            Button:
+                text: 'Home Screen'
+                on_release: app.change_screen("home_screen")

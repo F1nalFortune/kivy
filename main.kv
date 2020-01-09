@@ -1,6 +1,8 @@
 #:include kv/homescreen.kv
 #:include kv/settingsscreen.kv
 #:include kv/loginscreen.kv
+#:include kv/databasescreen.kv
+#:include kv/loaddialog.kv
 GridLayout:
     cols: 1
     ScreenManager:
@@ -14,3 +16,6 @@ GridLayout:
         SettingsScreen:
             name: "settings_screen"
             id: settings_screen
+        DatabaseScreen:
+            name: "database_screen"
+            id: database_screen

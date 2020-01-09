@@ -1,5 +1,4 @@
 import kivy.core.text
-import cv2
 from kivy.app import App
 from kivy.base import EventLoop
 from kivy.uix.image import Image
@@ -7,17 +6,106 @@ from kivy.clock import Clock
 from kivy.graphics.texture import Texture
 from kivy.uix.boxlayout import BoxLayout
 from kivy.core.window import Window
+from kivy.uix.camera import Camera
 from kivy.lang import Builder
 from kivy.uix.screenmanager import Screen
 from kivy.uix.button import ButtonBehavior
 from kivy.uix.label import Label
+from kivy.uix.floatlayout import FloatLayout
+from kivy.properties import ObjectProperty
+from kivy.uix.popup import Popup
+from os.path import sep, expanduser, isdir, dirname
+import datetime
+
 from myfirebase import MyFirebase
+import cv2
 import face_recognition
 import numpy as np
 import os
 import requests
 import json
+import pyrebase
 
+config = {
+    "apiKey": "AIzaSyDwRYIDcSZTaFcKSOsFn1bi0abpX3TDCC8",
+    "authDomain": "blacklister-b7bc8.firebaseapp.com",
+    "databaseURL": "https://blacklister-b7bc8.firebaseio.com",
+    "projectId": "blacklister-b7bc8",
+    "storageBucket": "blacklister-b7bc8.appspot.com",
+    "messagingSenderId": "602245924486",
+    "appId": "1:602245924486:web:9ea40d3ccb310ddfb7f307",
+    "measurementId": "G-J5EBNVVJ7K"
+}
+firebase = pyrebase.initialize_app(config)
+storage = firebase.storage()
+
+
+
+
+class LoadDialog(FloatLayout):
+    upload = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+
+
+class SaveDialog(FloatLayout):
+    save = ObjectProperty(None)
+    text_input = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+
+
+class DatabaseScreen(Screen):
+    loadfile = ObjectProperty(None)
+
+    def dismiss_popup(self):
+        self._popup.dismiss()
+
+    def show_load(self):
+        content = LoadDialog(upload=self.upload, cancel=self.dismiss_popup)
+        self._popup = Popup(title="Upload folder", content=content,
+                            size_hint=(0.9, 0.9))
+        self._popup.open()
+
+    def upload(self, path, company, localId, idToken):
+        # with open(os.path.join(path, filename[0]), encoding='ISO-8859-1') as stream:
+            # self.text_input.text = stream.read()
+        print(f"Path: {path}")
+        all_files = os.listdir(path)
+        print(f"All Files: {all_files}")
+        acceptable_formats = ['.png']
+        acceptable_files = []
+
+
+         # only grab acceptable file formats
+        for file in all_files:
+          if file[-4:] == '.png':
+            acceptable_files.append(f"{file}")
+
+         # upload each acceptable file
+        for file in acceptable_files:
+          path_on_cloud=f"{company}/{file}"
+          path_local= f"{path}/{file}"
+          response = storage.child(path_on_cloud).put(path_local)
+          #response eg
+          # {'name': "Toad's Place/craig_elkinz.png", 'bucket': 'blacklister-b7bc8.appspot.com', 'generation': '1578542328640757', 'metageneration': '1', 'contentType': 'image/png', 'timeCreated': '2020-01-09T03:58:48.640Z', 'updated': '2020-01-09T03:58:48.640Z', 'storageClass': 'STANDARD', 'size': '535352', 'md5Hash': '7SKntazlg5m7koUM9SSakg==', 'contentEncoding': 'identity', 'contentDisposition': "inline; filename*=utf-8''craig_elkinz.png", 'crc32c': 'cSr7xw==', 'etag': 'CPXpi7bQ9eYCEAE=', 'downloadTokens': '9f6d8e62-858b-4185-b052-4bf469f687a2'}
+          name = file[:-4]
+          my_data = '{"Date": "' + str(datetime.datetime.today().strftime('%Y-%m-%d')) + '"}'
+          post_request = requests.put(f"https://blacklister-b7bc8.firebaseio.com/{company}/blacklisters/{name}.json?auth={idToken}", data=my_data)
+
+
+        print(f"Acceptable Files: {acceptable_files}")
+
+        self.dismiss_popup()
+
+    def download(self, company, idToken):
+      #grab list of names to gather
+      request = requests.get(f"https://blacklister-b7bc8.firebaseio.com/{company}/blacklisters.json?auth={idToken}")
+      request_data = request.content.decode()
+      print(f"Data type: {type(request_data)}")
+      print(request.content.decode())
+      image_names = json.loads(request_data).keys()
+      path_local = "./blacklist_names"
+      for name in image_names:
+        storage.child(f"{company}/{name}.png").download(f"./blacklist_names/{name}.png")
 
 class HomeScreen(Screen):
     def init_main(self):
@@ -183,7 +271,10 @@ class mainApp(App):
       #Get Database Data
       result = requests.get("https://blacklister-b7bc8.firebaseio.com/")
       #Populate Blacklisters
-
+    def get(self):
+      request = requests.get(f"https://blacklister-b7bc8.firebaseio.com/{self.local_id}.json?auth={self.id_token}")
+      print(request.ok)
+      print(request.content.decode())
     def on_stop(self):
         global capture
         if capture:

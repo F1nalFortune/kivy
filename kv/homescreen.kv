@@ -15,6 +15,18 @@
             on_release: app.change_screen("settings_screen")
             size: 75, 50
             size_hint: None, None
+        Button:
+            text: "Download Pictures"
+            font_size: 12
+            on_release: app.get()
+            size: 75, 50
+            size_hint: None, None
+        Button:
+            text: "Blacklist Database"
+            font_size: 12
+            on_release: app.change_screen("database_screen")
+            size: 75, 50
+            size_hint: None, None
 
 
         # Button:
